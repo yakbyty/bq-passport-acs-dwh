@@ -166,21 +166,7 @@ function fetchRoutines_() {
  * делаем fallback на legacy __TABLES__ по датасетам.
  */
 function fetchStorageStats_() {
-  try {
-    const sql = buildFetchTableStorageSql_();
-
-    const rows = runQuery_(sql, {
-      useLegacySql: false,
-      location: CONFIG.core.region
-    });
-
-    return rows.map(function (row) {
-      return normalizeStorageRow_(row);
-    });
-  } catch (error) {
-    logWarn_('TABLE_STORAGE недоступен, переключаемся на fallback __TABLES__', error);
-    return fetchStorageStatsFromLegacyTables_();
-  }
+  return fetchStorageStatsFromLegacyTables_();
 }
 
 
@@ -238,13 +224,13 @@ function buildFetchTablesAndViewsSql_() {
       table_schema AS dataset_name,
       table_name,
       table_type,
-      managed_table_type,
+      '' AS managed_table_type,
       is_insertable_into,
-      is_fine_grained_mutations_enabled,
-      is_typed,
+      '' AS is_fine_grained_mutations_enabled,
+      '' AS is_typed,
       creation_time,
       ddl,
-      default_collation_name
+      '' AS default_collation_name
     FROM \`${CONFIG.core.projectId}.region-${CONFIG.core.region}.INFORMATION_SCHEMA.TABLES\`
     ORDER BY table_schema, table_type, table_name
   `;
@@ -349,7 +335,7 @@ function buildFetchTableStorageSql_() {
       table_catalog AS project_id,
       table_schema AS dataset_name,
       table_name,
-      row_count,
+      NULL AS row_count,
       total_logical_bytes AS size_bytes,
       creation_time AS storage_creation_time,
       last_modified_time,
