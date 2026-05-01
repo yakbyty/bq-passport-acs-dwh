@@ -64,7 +64,7 @@ function serviceTestFetchDatasets() {
   Logger.log('Datasets count: ' + datasets.length);
   Logger.log(JSON.stringify(datasets.slice(0, 10), null, 2));
 
-  SpreadsheetApp.getUi().alert('Найдено датасетов: ' + datasets.length);
+  return datasets;
 }
 
 
@@ -75,11 +75,21 @@ function serviceTestFetchObjects() {
   const objects = fetchTablesAndViews_();
 
   Logger.log('Objects count: ' + objects.length);
-  Logger.log(JSON.stringify(objects.slice(0, 10), null, 2));
 
-  SpreadsheetApp.getUi().alert('Найдено объектов: ' + objects.length);
+  const preview = objects.slice(0, 10).map(function (o) {
+    return {
+      object_key: buildObjectKey_(o.project_id, o.dataset_name, o.table_name),
+      dataset_name: o.dataset_name,
+      table_name: o.table_name,
+      table_type: o.table_type,
+      creation_time: o.creation_time
+    };
+  });
+
+  Logger.log(JSON.stringify(preview, null, 2));
+
+  return objects;
 }
-
 
 /**
  * Сброс cursor date coverage.
@@ -180,4 +190,79 @@ function serviceRunFast() {
  */
 function serviceRunFull() {
   refreshProjectPassportFull();
+}
+
+function serviceTestFetchColumns() {
+  const columns = fetchColumns_();
+
+  Logger.log('Columns count: ' + columns.length);
+
+  const preview = columns.slice(0, 10).map(function (c) {
+    return {
+      object_key: buildObjectKey_(c.project_id, c.dataset_name, c.table_name),
+      column_name: c.column_name,
+      data_type: c.data_type,
+      is_nullable: c.is_nullable
+    };
+  });
+
+  Logger.log(JSON.stringify(preview, null, 2));
+
+  return columns;
+}
+
+function serviceTestFetchTableOptions() {
+  const options = fetchTableOptions_();
+
+  Logger.log('Table options count: ' + options.length);
+
+  const preview = options.slice(0, 10).map(function (o) {
+    return {
+      object_key: buildObjectKey_(o.project_id, o.dataset_name, o.table_name),
+      option_name: o.option_name,
+      option_type: o.option_type,
+      option_value: o.option_value
+    };
+  });
+
+  Logger.log(JSON.stringify(preview, null, 2));
+
+  return options;
+}
+
+function serviceTestFetchViews() {
+  const views = fetchViews_();
+
+  Logger.log('Views count: ' + views.length);
+
+  const preview = views.slice(0, 10).map(function (v) {
+    return {
+      object_key: buildObjectKey_(v.project_id, v.dataset_name, v.table_name),
+      use_standard_sql: v.use_standard_sql
+    };
+  });
+
+  Logger.log(JSON.stringify(preview, null, 2));
+
+  return views;
+}
+
+function serviceTestFetchStorageStats() {
+  const storage = fetchStorageStats_();
+
+  Logger.log('Storage rows count: ' + storage.length);
+
+  const preview = storage.slice(0, 10).map(function (s) {
+    return {
+      object_key: buildObjectKey_(s.project_id, s.dataset_name, s.table_name),
+      row_count: s.row_count,
+      size_bytes: s.size_bytes,
+      last_modified_time: s.last_modified_time,
+      storage_source: s.storage_source
+    };
+  });
+
+  Logger.log(JSON.stringify(preview, null, 2));
+
+  return storage;
 }
