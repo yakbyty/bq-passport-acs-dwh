@@ -4,28 +4,6 @@
  *******************************************************/
 
 
-/**
- * Возвращает список табличных объектов проекта.
- * Источник:
- * region-<region>.INFORMATION_SCHEMA.TABLES
- *
- * Выход:
- * [
- *   {
- *     project_id,
- *     dataset_name,
- *     table_name,
- *     table_type,
- *     managed_table_type,
- *     is_insertable_into,
- *     is_fine_grained_mutations_enabled,
- *     is_typed,
- *     creation_time,
- *     ddl,
- *     default_collation_name
- *   }
- * ]
- */
 function fetchTablesAndViews_() {
   const sql = buildFetchTablesAndViewsSql_();
 
@@ -40,10 +18,6 @@ function fetchTablesAndViews_() {
 }
 
 
-/**
- * Возвращает только materialized views.
- * Безопасно: если поле/тип недоступен, просто вернет пустой массив по фильтру.
- */
 function fetchMaterializedViews_() {
   return fetchTablesAndViews_().filter(function (row) {
     return String(row.table_type || '').toUpperCase() === CONFIG.objectTypes.materializedView;
@@ -51,9 +25,6 @@ function fetchMaterializedViews_() {
 }
 
 
-/**
- * Возвращает только external tables.
- */
 function fetchExternalTables_() {
   return fetchTablesAndViews_().filter(function (row) {
     return String(row.table_type || '').toUpperCase() === CONFIG.objectTypes.external;
@@ -61,9 +32,6 @@ function fetchExternalTables_() {
 }
 
 
-/**
- * Возвращает только snapshots.
- */
 function fetchSnapshots_() {
   return fetchTablesAndViews_().filter(function (row) {
     return String(row.table_type || '').toUpperCase() === CONFIG.objectTypes.snapshot;
@@ -71,9 +39,6 @@ function fetchSnapshots_() {
 }
 
 
-/**
- * Возвращает только clones.
- */
 function fetchClones_() {
   return fetchTablesAndViews_().filter(function (row) {
     return String(row.table_type || '').toUpperCase() === CONFIG.objectTypes.clone;
@@ -81,11 +46,6 @@ function fetchClones_() {
 }
 
 
-/**
- * Возвращает колонки всех объектов проекта.
- * Источник:
- * region-<region>.INFORMATION_SCHEMA.COLUMNS
- */
 function fetchColumns_() {
   const sql = buildFetchColumnsSql_();
 
@@ -100,11 +60,6 @@ function fetchColumns_() {
 }
 
 
-/**
- * Возвращает options таблиц/объектов.
- * Источник:
- * region-<region>.INFORMATION_SCHEMA.TABLE_OPTIONS
- */
 function fetchTableOptions_() {
   const sql = buildFetchTableOptionsSql_();
 
@@ -119,11 +74,6 @@ function fetchTableOptions_() {
 }
 
 
-/**
- * Возвращает definitions для VIEW.
- * Источник:
- * region-<region>.INFORMATION_SCHEMA.VIEWS
- */
 function fetchViews_() {
   const sql = buildFetchViewsSql_();
 
@@ -138,12 +88,6 @@ function fetchViews_() {
 }
 
 
-/**
- * Возвращает routines проекта:
- * functions / procedures / table functions.
- * Источник:
- * region-<region>.INFORMATION_SCHEMA.ROUTINES
- */
 function fetchRoutines_() {
   const sql = buildFetchRoutinesSql_();
 
@@ -159,20 +103,14 @@ function fetchRoutines_() {
 
 
 /**
- * Возвращает storage statistics.
- *
- * Предпочтительно используем INFORMATION_SCHEMA.TABLE_STORAGE.
- * Если по какой-то причине запрос не проходит,
- * делаем fallback на legacy __TABLES__ по датасетам.
+ * Используем legacy __TABLES__, потому что в твоём TABLE_STORAGE
+ * нет стабильных полей row_count / last_modified_time.
  */
 function fetchStorageStats_() {
   return fetchStorageStatsFromLegacyTables_();
 }
 
 
-/**
- * Fallback storage statistics через dataset.__TABLES__
- */
 function fetchStorageStatsFromLegacyTables_() {
   const datasets = fetchDatasets_();
   const datasetNames = extractDatasetNames_(datasets);
@@ -189,8 +127,8 @@ function fetchStorageStatsFromLegacyTables_() {
         table_id AS table_name,
         row_count,
         size_bytes,
-        TIMESTAMP_MILLIS(creation_time) AS storage_creation_time,
-        TIMESTAMP_MILLIS(last_modified_time) AS last_modified_time,
+        FORMAT_TIMESTAMP('%F %T', TIMESTAMP_MILLIS(creation_time), '${CONFIG.core.timezone}') AS storage_creation_time,
+        FORMAT_TIMESTAMP('%F %T', TIMESTAMP_MILLIS(last_modified_time), '${CONFIG.core.timezone}') AS last_modified_time,
         '' AS active_logical_bytes,
         '' AS long_term_logical_bytes,
         '' AS active_physical_bytes,
@@ -214,9 +152,6 @@ function fetchStorageStatsFromLegacyTables_() {
 }
 
 
-/**
- * Строит SQL для TABLES
- */
 function buildFetchTablesAndViewsSql_() {
   return `
     SELECT
@@ -237,9 +172,6 @@ function buildFetchTablesAndViewsSql_() {
 }
 
 
-/**
- * Строит SQL для COLUMNS
- */
 function buildFetchColumnsSql_() {
   return `
     SELECT
@@ -263,9 +195,6 @@ function buildFetchColumnsSql_() {
 }
 
 
-/**
- * Строит SQL для TABLE_OPTIONS
- */
 function buildFetchTableOptionsSql_() {
   return `
     SELECT
@@ -281,9 +210,6 @@ function buildFetchTableOptionsSql_() {
 }
 
 
-/**
- * Строит SQL для VIEWS
- */
 function buildFetchViewsSql_() {
   return `
     SELECT
@@ -299,9 +225,6 @@ function buildFetchViewsSql_() {
 }
 
 
-/**
- * Строит SQL для ROUTINES
- */
 function buildFetchRoutinesSql_() {
   return `
     SELECT
@@ -326,9 +249,6 @@ function buildFetchRoutinesSql_() {
 }
 
 
-/**
- * Строит SQL для TABLE_STORAGE
- */
 function buildFetchTableStorageSql_() {
   return `
     SELECT
@@ -338,7 +258,7 @@ function buildFetchTableStorageSql_() {
       NULL AS row_count,
       total_logical_bytes AS size_bytes,
       creation_time AS storage_creation_time,
-      last_modified_time,
+      NULL AS last_modified_time,
       active_logical_bytes,
       long_term_logical_bytes,
       active_physical_bytes,
@@ -349,9 +269,6 @@ function buildFetchTableStorageSql_() {
 }
 
 
-/**
- * Нормализация строки объекта TABLES
- */
 function normalizeTableObjectRow_(row) {
   return {
     project_id: normalizeStringSafe_(row.project_id),
@@ -369,9 +286,6 @@ function normalizeTableObjectRow_(row) {
 }
 
 
-/**
- * Нормализация строки колонки
- */
 function normalizeColumnRow_(row) {
   return {
     project_id: normalizeStringSafe_(row.project_id),
@@ -392,9 +306,6 @@ function normalizeColumnRow_(row) {
 }
 
 
-/**
- * Нормализация строки option
- */
 function normalizeTableOptionRow_(row) {
   return {
     project_id: normalizeStringSafe_(row.project_id),
@@ -407,9 +318,6 @@ function normalizeTableOptionRow_(row) {
 }
 
 
-/**
- * Нормализация VIEW row
- */
 function normalizeViewRow_(row) {
   return {
     project_id: normalizeStringSafe_(row.project_id),
@@ -422,9 +330,6 @@ function normalizeViewRow_(row) {
 }
 
 
-/**
- * Нормализация ROUTINE row
- */
 function normalizeRoutineRow_(row) {
   return {
     project_id: normalizeStringSafe_(row.project_id),
@@ -446,9 +351,6 @@ function normalizeRoutineRow_(row) {
 }
 
 
-/**
- * Нормализация storage row
- */
 function normalizeStorageRow_(row) {
   return {
     project_id: normalizeStringSafe_(row.project_id),
@@ -462,14 +364,11 @@ function normalizeStorageRow_(row) {
     long_term_logical_bytes: normalizeNumberSafe_(row.long_term_logical_bytes),
     active_physical_bytes: normalizeNumberSafe_(row.active_physical_bytes),
     long_term_physical_bytes: normalizeNumberSafe_(row.long_term_physical_bytes),
-    storage_source: 'INFORMATION_SCHEMA.TABLE_STORAGE'
+    storage_source: 'LEGACY___TABLES__'
   };
 }
 
 
-/**
- * Map объектов по ключу project.dataset.table
- */
 function buildObjectsMap_(objects) {
   const items = Array.isArray(objects) ? objects : [];
   const map = {};
@@ -483,9 +382,6 @@ function buildObjectsMap_(objects) {
 }
 
 
-/**
- * Map storage по ключу project.dataset.table
- */
 function buildStorageMapFromRows_(rows) {
   const items = Array.isArray(rows) ? rows : [];
   const map = {};
@@ -499,12 +395,6 @@ function buildStorageMapFromRows_(rows) {
 }
 
 
-/**
- * Группировка колонок по объекту.
- * {
- *   "project.dataset.table": [ ...columns ]
- * }
- */
 function buildColumnsGroupedMap_(columns) {
   const items = Array.isArray(columns) ? columns : [];
   const map = {};
@@ -529,12 +419,6 @@ function buildColumnsGroupedMap_(columns) {
 }
 
 
-/**
- * Группировка options по объекту.
- * {
- *   "project.dataset.table": [ ...options ]
- * }
- */
 function buildTableOptionsGroupedMap_(rows) {
   const items = Array.isArray(rows) ? rows : [];
   const map = {};
@@ -553,9 +437,6 @@ function buildTableOptionsGroupedMap_(rows) {
 }
 
 
-/**
- * Map view definitions по объекту
- */
 function buildViewsMap_(rows) {
   const items = Array.isArray(rows) ? rows : [];
   const map = {};
@@ -569,9 +450,6 @@ function buildViewsMap_(rows) {
 }
 
 
-/**
- * Map routines по ключу project.dataset.routine
- */
 function buildRoutinesMap_(rows) {
   const items = Array.isArray(rows) ? rows : [];
   const map = {};
@@ -585,9 +463,6 @@ function buildRoutinesMap_(rows) {
 }
 
 
-/**
- * Возвращает summary по объектам
- */
 function buildObjectsFetchSummary_(objects) {
   const items = Array.isArray(objects) ? objects : [];
 
@@ -615,37 +490,4 @@ function buildObjectsFetchSummary_(objects) {
   });
 
   return summary;
-}
-
-
-/**
- * Безопасная нормализация чисел
- */
-function normalizeNumberSafe_(value) {
-  if (value === null || value === undefined || value === '') {
-    return '';
-  }
-
-  const n = Number(value);
-  return isNaN(n) ? '' : n;
-}
-
-
-/**
- * Нормализация сложного/неизвестного значения
- */
-function normalizeUnknownValueSafe_(value) {
-  if (value === null || value === undefined) {
-    return '';
-  }
-
-  if (typeof value === 'object') {
-    try {
-      return JSON.stringify(value);
-    } catch (error) {
-      return String(value);
-    }
-  }
-
-  return value;
 }
