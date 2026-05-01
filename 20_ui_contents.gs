@@ -46,3 +46,14 @@ function onOpen() {
 
     .addToUi();
 }
+
+function writeDictionarySheet_() {
+  const rows = buildDictionaryRows_();
+
+  writeSheet_(
+    CONFIG.sheets.dictionary,
+    ['field', 'value', 'description'],
+    rows,
+    null
+  );
+}
