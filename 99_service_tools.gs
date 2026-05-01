@@ -48,8 +48,10 @@ function serviceTestBigQueryAccess() {
     location: CONFIG.core.region
   });
 
+  Logger.log('BigQuery test OK');
   Logger.log(JSON.stringify(result, null, 2));
-  SpreadsheetApp.getUi().alert('BigQuery test OK. Проверь Executions / Logs.');
+
+  return result;
 }
 
 
