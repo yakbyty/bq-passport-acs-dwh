@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DEMO — Панель керівника</title>
+<style>
+:root{
+  --bg:#09121b; --panel:#0f2231; --panel2:#132b3d; --line:#28475b;
+  --text:#eef5f8; --muted:#91a7b6; --cyan:#54c9e6; --green:#63d59a;
+  --yellow:#f2c15b; --red:#f27d7d; --white:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#071019 0%,#0a1722 100%);color:var(--text);font:14px/1.45 Arial,sans-serif}
+header{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;align-items:flex-start}
+h1{margin:0;font-size:24px}.subtitle{color:var(--muted);margin-top:5px;max-width:850px}
+.demo{font:11px monospace;color:var(--cyan);margin-top:7px}.sync{font:12px monospace;color:var(--muted);text-align:right}
+.ok{color:var(--green)}
+.wrap{max-width:1500px;margin:auto;padding:16px 24px 36px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button,.periods button{border:1px solid var(--line);background:#0d1d2a;color:var(--text);padding:9px 13px;border-radius:8px;cursor:pointer}
+.tabs button.active,.periods button.active{background:var(--cyan);border-color:var(--cyan);color:#071019;font-weight:800}
+.panel{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h2{margin:0 0 12px;font-size:17px}.panel h3{margin:12px 0 6px;font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:12px;padding:15px}
+.card small{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.06em}.card .v{font:800 25px monospace;margin:7px 0}.card .hint{font-size:12px;color:var(--muted)}
+.row{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}
+.row.equal{grid-template-columns:1fr 1fr}
+.mode{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:2px 0 12px;color:var(--muted)}
+.periods{display:flex;gap:6px;flex-wrap:wrap}
+.decision{border-left:4px solid var(--yellow);background:#10283a;margin:8px 0;padding:10px 12px;border-radius:4px}
+.decision.good{border-color:var(--green)}.decision.bad{border-color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px;border-bottom:1px solid #183549;text-align:left;vertical-align:top}th{color:var(--muted)}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:800;background:#19364a}
+.badge.good{background:#173b2d;color:#9ef0be}.badge.warn{background:#443516;color:#ffe092}.badge.bad{background:#482527;color:#ffc0c0}
+.hidden{display:none}
+.about-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.about-card{background:#0d1f2d;border:1px solid var(--line);border-radius:10px;padding:14px}
+.about-card b{display:block;color:var(--cyan);margin-bottom:5px}.about-card p{margin:0;color:#c8d4dc}
+.callout{margin-top:14px;background:#0d2433;border:1px solid #31546a;border-radius:10px;padding:13px}
+.callout b{color:var(--green)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:10px}
+.bar{height:8px;background:#1a3446;border-radius:8px;overflow:hidden;margin-top:5px}.bar i{display:block;height:100%;background:var(--cyan)}
+.funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.funnel div{background:#0c1d2a;border:1px solid var(--line);padding:11px;border-radius:9px}
+.funnel strong{display:block;font:800 18px monospace}
+.note{color:var(--muted);font-size:12px}
+@media(max-width:950px){.kpis,.about-grid{grid-template-columns:1fr 1fr}.row,.row.equal{grid-template-columns:1fr}.funnel{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.kpis,.about-grid,.funnel{grid-template-columns:1fr}header{flex-direction:column}.sync{text-align:left}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>DEMO // Панель керівника</h1>
+    <div class="subtitle">Реклама, фактичні продажі й потенціал попиту — в одному місці, але без чарівного змішування цифр у «ну наче все добре».</div>
+    <div class="demo">CLEAN-ROOM DEMO • синтетичні дані • логіка перевірена за реальною системою</div>
+  </div>
+  <div class="sync">ОСТАННЄ ОНОВЛЕННЯ<br><b>сьогодні, 08:05</b><br><span class="ok">DATA HEALTH: OK</span></div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="active" data-tab="about">ПРО ЦЕ</button>
+    <button data-tab="ads">АНАЛІЗ РЕКЛАМИ</button>
+    <button data-tab="sales">ФАКТ ПРОДАЖІВ</button>
+    <button data-tab="demand">ПОТЕНЦІАЛ ПОПИТУ</button>
+  </div>
+
+  <section id="about">
+    <div class="panel">
+      <h2>Що це взагалі таке?</h2>
+      <p>Панель для керівника, який не хоче кожного ранку відкривати Ads, CRM, таблицю продажів, Merchant і ще три файли, а потім намагатися згадати, чому цифри між ними не збігаються.</p>
+      <div class="callout"><b>Головний принцип:</b> рекламні метрики, фактичні продажі та потенціал попиту показуються поруч, але не видаються за одне й те саме. Бо ROAS — це не гроші в касі, а «є кліки» — не означає «ринок хоче саме це».</div>
+
+      <h3>Що є на кожній сторінці</h3>
+      <div class="about-grid">
+        <div class="about-card"><b>АНАЛІЗ РЕКЛАМИ</b><p><strong>Що це:</strong> витрати, conversion value, ROAS, рекламне покриття SKU, проблемні та перспективні кампанії.<br><strong>Навіщо:</strong> зрозуміти, де реклама заробляє, де просто їсть бюджет, а де товар взагалі не отримав шанс показатися.<br><strong>Коли сюди йти:</strong> коли хочеться «додати бюджет» або «вимкнути все це неподобство».</p></div>
+        <div class="about-card"><b>ФАКТ ПРОДАЖІВ</b><p><strong>Що це:</strong> реальні замовлення з облікового контуру, окремо за каналами.<br><strong>Навіщо:</strong> перевірити, чи збігається красива історія рекламної платформи з тим, що бізнес реально продав.<br><strong>Коли сюди йти:</strong> коли Ads каже «я молодець», а бухгалтерія дивиться мовчки.</p></div>
+        <div class="about-card"><b>ПОТЕНЦІАЛ ПОПИТУ</b><p><strong>Що це:</strong> SKU, де є ознаки попиту, але продажі, реклама або залишок не дають цьому попиту реалізуватися.<br><strong>Навіщо:</strong> знайти не тільки те, що вже продається, а й те, де бізнес недозаробляє.<br><strong>Коли сюди йти:</strong> перед закупівлею, плануванням виробництва, запуском реклами або зміною асортиментного пріоритету.</p></div>
+        <div class="about-card"><b>ПЕРІОДИ 1 / 7 / 30 / 365</b><p><strong>Що це:</strong> різні вікна спостереження.<br><strong>Навіщо:</strong> не приймати стратегічне рішення через один дивний вівторок.<br><strong>Коли сюди йти:</strong> 1 день — сигнал, 7 — тренд, 30 — робоче рішення, 365 — контекст.</p></div>
+      </div>
+
+      <div class="callout"><b>Що в демо справжнє:</b> логіка трьох управлінських екранів, принцип розділення рекламної атрибуції й факту продажів, SKU-level аналіз і підхід до управлінських рішень.<br><b>Що несправжнє:</b> усі суми, SKU, назви кампаній та обсяги — синтетичні. Ніхто не постраждав, навіть рекламний бюджет.</div>
+    </div>
+  </section>
+
+  <section id="ads" class="hidden">
+    <div class="mode">
+      <span>Реклама: що відбувається і де потрібне рішення</span>
+      <div class="periods">
+        <button data-p="1d">ВЧОРА</button><button data-p="7d">7 ДНІВ</button><button class="active" data-p="30d">30 ДНІВ</button><button data-p="365d">365 ДНІВ</button>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="card"><small>Витрати на рекламу</small><div class="v" id="aCost">55 700 ₴</div><div class="hint">Скільки реально списала рекламна система</div></div>
+      <div class="card"><small>Conversion value Ads</small><div class="v" id="aValue">317 000 ₴</div><div class="hint">Атрибуція Google, а не касовий апарат</div></div>
+      <div class="card"><small>ROAS Ads</small><div class="v" id="aRoas">5.69</div><div class="hint">Корисний показник. Але не прибуток.</div></div>
+      <div class="card"><small>Покриття SKU</small><div class="v">50.2%</div><div class="hint">Половина каталогу ще десь гуляє без показів</div></div>
+    </div>
+    <div class="row">
+      <div class="panel">
+        <h2>Що потребує рішення</h2>
+        <div class="decision bad"><b>P1 — Покриття SKU</b><br>Є товари, які мають рекламний маршрут і статус ELIGIBLE, але не отримують показів. Спочатку перевірити Merchant / labels / listing groups. Бюджет тут ні до чого.</div>
+        <div class="decision"><b>P1 — Bleeders</b><br>Є витрати, але ROAS нижче робочого порогу. Послідовність: економіка → маршрут → запити → картка товару. Вимкнути одним кліком — швидко. Зрозуміти чому — корисніше.</div>
+        <div class="decision good"><b>P2 — Кандидати на масштабування</b><br>Хороший ROAS + конверсії. Перед збільшенням бюджету перевірити маржу, залишок і чи не закінчиться товар раніше за оптимізацію Google.</div>
+      </div>
+      <div class="panel">
+        <h2>Кампанії</h2>
+        <table>
+          <tr><th>Кампанія</th><th>Cost</th><th>ROAS</th><th>Сигнал</th></tr>
+          <tr><td>DEMO — Pipes Core</td><td>18 400</td><td>7.4</td><td><span class="badge good">SCALE CHECK</span></td></tr>
+          <tr><td>DEMO — Brake</td><td>25 100</td><td>4.1</td><td><span class="badge">HOLD</span></td></tr>
+          <tr><td>DEMO — Discovery</td><td>12 200</td><td>1.8</td><td><span class="badge bad">AUDIT</span></td></tr>
+        </table>
+        <div class="legend"><span>🟢 масштабуємо після перевірки</span><span>🟡 розбираємо причину</span><span>🔴 не робимо вигляд, що все гаразд</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sales" class="hidden">
+    <div class="kpis">
+      <div class="card"><small>Факт продажів</small><div class="v">412 000 ₴</div><div class="hint">Замовлення з облікового контуру</div></div>
+      <div class="card"><small>Google / CPC</small><div class="v">186 000 ₴</div><div class="hint">Факт замовлень з рекламними UTM</div></div>
+      <div class="card"><small>B2B</small><div class="v">144 000 ₴</div><div class="hint">Реальний B2B оборот</div></div>
+      <div class="card"><small>Інші канали</small><div class="v">82 000 ₴</div><div class="hint">Повторні, direct та інше</div></div>
+    </div>
+    <div class="row">
+      <div class="panel">
+        <h2>Продажі за каналами</h2>
+        <table>
+          <tr><th>Канал</th><th>Виручка</th><th>Замовлення</th><th>Середній чек</th></tr>
+          <tr><td>google / cpc</td><td>186 000 ₴</td><td>72</td><td>2 583 ₴</td></tr>
+          <tr><td>B2B</td><td>144 000 ₴</td><td>18</td><td>8 000 ₴</td></tr>
+          <tr><td>Direct / repeat</td><td>82 000 ₴</td><td>39</td><td>2 103 ₴</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Чому тут дві різні цифри</h2>
+        <div class="decision"><b>317 000 ₴ в Ads ≠ 186 000 ₴ факту google/cpc.</b><br>І це не обов'язково помилка. Рекламна платформа використовує власну модель атрибуції. Бізнес використовує свої замовлення. Панель показує обидві цифри, щоб вони нарешті перестали прикидатися близнюками.</div>
+        <p class="note">У реальному контурі це місце використовується для звірки рекламної картини з фактичними замовленнями.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="demand" class="hidden">
+    <div class="kpis">
+      <div class="card"><small>SKU з високим попитом</small><div class="v">126</div><div class="hint">Попит вищий за поточний продаж</div></div>
+      <div class="card"><small>Мало / немає залишку</small><div class="v">34</div><div class="hint">Потенціал впирається у stock</div></div>
+      <div class="card"><small>Є попит, немає реклами</small><div class="v">51</div><div class="hint">Кандидати на coverage audit</div></div>
+      <div class="card"><small>Сценарний потенціал</small><div class="v">≈ 210k ₴</div><div class="hint">Оцінка можливості, не пророцтво</div></div>
+    </div>
+
+    <div class="row">
+      <div class="panel">
+        <h2>SKU: попит × продажі × реклама × залишок</h2>
+        <table>
+          <tr><th>SKU</th><th>Попит</th><th>Продажі</th><th>Ads</th><th>Stock</th><th>Що робити</th></tr>
+          <tr><td>D-001</td><td><span class="badge good">Високий</span></td><td>Середні</td><td>Немає</td><td>24</td><td>Повернути в рекламу</td></tr>
+          <tr><td>D-002</td><td><span class="badge good">Високий</span></td><td>Низькі</td><td>Є</td><td>2</td><td>Спочатку поповнити запас</td></tr>
+          <tr><td>D-003</td><td><span class="badge warn">Середній</span></td><td>Низькі</td><td>Є</td><td>18</td><td>Аудит офера / картки</td></tr>
+          <tr><td>D-004</td><td><span class="badge good">Високий</span></td><td>Високі</td><td>Є</td><td>31</td><td>Кандидат на масштабування</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>Як читати «потенціал»</h2>
+        <div class="funnel">
+          <div><small>ПОПИТ</small><strong>126 SKU</strong><span class="note">ринок подає сигнал</span></div>
+          <div><small>Є ТОВАР</small><strong>92 SKU</strong><span class="note">не вперлись у залишок</span></div>
+          <div><small>Є ПОКРИТТЯ ADS</small><strong>41 SKU</strong><span class="note">отримали шанс на показ</span></div>
+          <div><small>ПРОДАЮТЬСЯ</small><strong>29 SKU</strong><span class="note">є фактичний результат</span></div>
+        </div>
+        <div class="decision good" style="margin-top:14px"><b>Управлінський сенс:</b><br>Зростання може бути не в «зробити рекламу кращою», а в повернути товар у наявність, виправити маршрут або дати рекламі товар, на який уже є попит.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const tabs=[...document.querySelectorAll('.tabs button')];
+tabs.forEach(b=>b.addEventListener('click',()=>{
+  tabs.forEach(x=>x.classList.remove('active')); b.classList.add('active');
+  ['about','ads','sales','demand'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!==b.dataset.tab));
+}));
+const periodData={
+ '1d':['1 900 ₴','9 600 ₴','5.05'],
+ '7d':['13 200 ₴','72 500 ₴','5.49'],
+ '30d':['55 700 ₴','317 000 ₴','5.69'],
+ '365d':['620 000 ₴','3 180 000 ₴','5.13']
+};
+document.querySelectorAll('.periods button').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.periods button').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+ const d=periodData[b.dataset.p]; document.getElementById('aCost').textContent=d[0];document.getElementById('aValue').textContent=d[1];document.getElementById('aRoas').textContent=d[2];
+}));
+</script>
+</body>
+</html>
