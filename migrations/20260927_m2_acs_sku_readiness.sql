@@ -40,7 +40,7 @@ OPTIONS (
   format = 'GOOGLE_SHEETS',
   uris = ['https://docs.google.com/spreadsheets/d/1rIYX8dzqSK23JbT2-8sINta3RZCvReCbjYYaCpIIeVg/edit?usp=sharing'],
   sheet_range = 'выгрузка!A:AB',
-  skip_leading_rows = 4
+  skip_leading_rows = 1
 );
 
 CREATE OR REPLACE EXTERNAL TABLE `supple-gearbox-470711-e3.analytics_demand_acsparts.ext_cogs_current`
